@@ -78,46 +78,49 @@ def main():
         pretty_utils.reset_styling()
     pretty_utils.verbose = args.verbose
 
-    already_seen = dict()
-    for line in sys.stdin:
-        msg = parse_message(line)
-        if msg is None:
-            continue
-        try:
-            if type(msg['type']) == int:
-                # dmesg log contains messages with numeric type.
-                # Remap to string type for further processing.
-                msg['type'] = string_types[msg['type']]
-
-            if len(args.exclude) != 0 and msg['type'] in args.exclude or\
-               len(args.only) != 0 and msg['type'] not in args.only:
+    try:
+        already_seen = dict()
+        for line in sys.stdin:
+            msg = parse_message(line)
+            if msg is None:
                 continue
+            try:
+                if type(msg['type']) == int:
+                    # dmesg log contains messages with numeric type.
+                    # Remap to string type for further processing.
+                    msg['type'] = string_types[msg['type']]
 
-            main_info = main_info_filters[msg['type']](msg)
-            result = pretty_printers[msg['type']](msg)
-            if result is None and not args.hide_unknown:
-                print('Failed to format message, printing as is.')
-                print(line)
-            if args.merge:
-                hashable_info = FrozenDict(main_info)
-                if hashable_info not in already_seen.keys():
-                    if not args.count:
-                        print(result)
-                already_seen[hashable_info] = already_seen.get(hashable_info, 0) + 1
-            else:
+                if len(args.exclude) != 0 and msg['type'] in args.exclude or\
+                   len(args.only) != 0 and msg['type'] not in args.only:
+                    continue
+
+                main_info = main_info_filters[msg['type']](msg)
+                result = pretty_printers[msg['type']](msg)
+                if result is None and not args.hide_unknown:
+                    print('Failed to format message, printing as is.')
+                    print(line)
+                if args.merge:
+                    hashable_info = FrozenDict(main_info)
+                    if hashable_info not in already_seen.keys():
+                        if not args.count:
+                            print(result)
+                    already_seen[hashable_info] = already_seen.get(hashable_info, 0) + 1
+                else:
+                    print(result)
+            except KeyError:
+                if len(args.only) == 0 and not args.hide_unknown:
+                    print('Unknown message type, printing as is.')
+                    print(line)
+
+        if args.count:
+            for info, count in already_seen.items():
+                result = pretty_printers[info['type']](info, suffix='(' + str(count) + ')')
+                if result is None and not args.hide_unknown:
+                    print('Failed to format message, printing as is.')
+                    print(line)
                 print(result)
-        except KeyError:
-            if len(args.only) == 0 and not args.hide_unknown:
-                print('Unknown message type, printing as is.')
-                print(line)
-
-    if args.count:
-        for info, count in already_seen.items():
-            result = pretty_printers[info['type']](info, suffix='(' + str(count) + ')')
-            if result is None and not args.hide_unknown:
-                print('Failed to format message, printing as is.')
-                print(line)
-            print(result)
+    except KeyboardInterrupt:
+        return
 
 
 if __name__ == '__main__':
