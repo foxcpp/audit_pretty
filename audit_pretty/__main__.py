@@ -34,8 +34,14 @@ def parse_message(line: str) -> dict:
         if match.group(3) is not None:
             result[match.group(1)] = match.group(3)
     for k, v in result.items():
-        if v.isdigit():
-            result[k] = int(v)
+        try:
+            if v.isdigit():
+                result[k] = int(v)
+            if v.startswith('0x'):
+                result[k] = int(v, base=16)
+        except ValueError:
+            pass
+
     return result
 
 

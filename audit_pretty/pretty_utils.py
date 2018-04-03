@@ -36,7 +36,7 @@ def pretty_helper(title: str, time_=0, info={}, extra_info={}, urgency='info', s
         timestamp=(time.strftime('%D %H:%M:%S', time.localtime(time_)) if time_ != 0 else '??/??/?? ??:??:??'),
         title=title,
         suffix=suffix,
-        information='\n  '.join([info_fmt.format(k, v, **styling) for k, v in info.items()]) +
-                    ('\n  ' + '\n  '.join([info_fmt.format(k, v, **styling) for k, v in extra_info.items()]) if verbose else ''),
+        information='\n  '.join([info_fmt.format(k, v, **styling) for k, v in info.items() if v != '?']) +
+                    ('\n  ' + '\n  '.join([info_fmt.format(k, v, **styling) for k, v in extra_info.items()]) if verbose and v != '?' else ''),
         **styling, **urgency_styling[urgency]
     )
