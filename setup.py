@@ -1,8 +1,9 @@
 from setuptools import setup
+from audit_pretty import __version__
 
 setup(
     name="audit_pretty",
-    version="0.0.1",
+    version=__version__,
     author="fox.cpp",
     author_email="fox.cpp@disroot.org",
     description="Linux Auditing System logs pretty printer",

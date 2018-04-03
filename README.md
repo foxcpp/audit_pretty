@@ -9,10 +9,8 @@
 Installation
 ------------------------
 
-As usual, it's better to use pip.
-```
-pip3 install audit_pretty
-```
+You can run script directly from repository: `python3 -m audit_pretty ARGS...`
+or install it to system directory: `pip3 install audit_pretty`
 
 Usage
 ------------------------
@@ -32,10 +30,13 @@ format!
 sudo dmesg -w | audit-pretty
 ```
 
+There are bunch of useful options you may want to use, check out `audit-pretty -h`!
+
 Room for improvement
 ------------------------
 
 - [x] Don't use colors (`--no-colors`)
+- [x] Filter by time (`--since`, `--until`)
 - [ ] Handle more than just AppArmor violations
 - [x] Verbose option to include more info (`-v`, `--verbose`)
 - [x] Filter message types (`-e`, `--exclude`, `--only`)
