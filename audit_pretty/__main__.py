@@ -4,7 +4,7 @@ import sys
 import re
 import argparse
 
-from audit_pretty import pretty_utils
+from audit_pretty import format_utils
 from audit_pretty.parsers import pretty_printers, main_info_filters
 from audit_pretty.frozendict import FrozenDict
 
@@ -87,7 +87,7 @@ def setup_argparse() -> argparse.ArgumentParser:
     return parser
 
 
-def should_print(args, msg) -> bool:
+def should_process(args, msg) -> bool:
     # Yes, I want to write this function exactly this way because it's easier to read.
     if msg is None:
         return False
@@ -115,21 +115,21 @@ def main():
     if args.count:
         args.merge = True
     if not args.color:
-        pretty_utils.reset_styling()
-    pretty_utils.verbose = args.verbose
+        format_utils.reset_styling()
+    format_utils.verbose = args.verbose
 
     try:
         already_seen = dict()
         for line in sys.stdin:
             msg = parse_message(line)
 
+            if not should_process(args, msg):
+                continue
+
             if type(msg['type']) == int:
                 # dmesg log contains messages with numeric type.
                 # Remap to string type for further processing.
                 msg['type'] = string_types[msg['type']]
-
-            if not should_print(args, msg):
-                continue
 
             main_info = main_info_filters[msg['type']](msg)
             result = pretty_printers[msg['type']](msg)

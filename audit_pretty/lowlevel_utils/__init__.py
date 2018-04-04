@@ -1,5 +1,5 @@
 import signal
-from audit_pretty.syscall_table import syscall_table
+from .syscall_table import syscall_table
 
 signals = {}
 

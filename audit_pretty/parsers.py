@@ -1,8 +1,8 @@
 import os
 from collections import defaultdict
-
-import audit_pretty.lowlevel_utils as lowlevel_utils
-from audit_pretty.pretty_utils import pretty_helper
+from audit_pretty.lowlevel_utils import decode_signal, decode_syscall
+from audit_pretty.format_utils import format_helper
+from datetime import datetime
 
 # How to add support for new message type:
 # 1. Implement pretty printer function. Call pretty_helper with
@@ -17,22 +17,22 @@ from audit_pretty.pretty_utils import pretty_helper
 
 def apparmor_pretty(msg, suffix='') -> str:
     if msg['apparmor'] == 'DENIED':
-        return pretty_helper(
+        return format_helper(
                 'AppArmor policy violation',
-                time_=msg.get('time', 0),
+                timestamp=datetime.fromtimestamp(msg['time']) if 'time' in msg else None,
                 urgency='warn',
                 suffix=suffix,
                 info={
-                    'Operation': msg.get('operation', '?'),
-                    'Profile': msg.get('profile', '?'),
-                    'Target': msg.get('name', msg.get('peer', '?')),
-                    'Denied mask': msg.get('denied_mask', '?')
+                    'Operation': msg.get('operation'),
+                    'Profile': msg.get('profile'),
+                    'Target': msg.get('name', msg.get('peer')),
+                    'Denied mask': msg.get('denied_mask')
                 },
                 extra_info={
-                    'Requested mask': msg.get('requested_mask', '?'),
-                    'Process ID': msg.get('pid', '?'),
-                    'FS UID': msg.get('fsuid', '?'),
-                    'OUID': msg.get('ouid', '?')
+                    'Requested mask': msg.get('requested_mask'),
+                    'Process ID': msg.get('pid'),
+                    'FS UID': msg.get('fsuid'),
+                    'OUID': msg.get('ouid')
                 })
     else:
         print('Unknown AppArmor message type, printing as is.')
@@ -41,6 +41,7 @@ def apparmor_pretty(msg, suffix='') -> str:
 
 def apparmor_main_info(msg) -> dict:
     m = msg.copy()
+
     def del_if_present(key):
         if key in m:
             del m[key]
@@ -55,16 +56,16 @@ def apparmor_main_info(msg) -> dict:
 
 
 def seccomp_pretty(msg, suffix='') -> str:
-    return pretty_helper(
+    return format_helper(
             'seccomp policy violation',
-            time_=msg.get('time', 0),
+            timestamp=datetime.fromtimestamp(msg['time']) if 'time' in msg else None,
             urgency='warn',
             suffix=suffix,
             info={
-                'Executable': msg.get('exe', '?'),
-                'Signal': lowlevel_utils.decode_signal(msg.get('sig')),
-                'Errno': os.strerror(msg['code']) if 'code' in msg and msg['code'] != 0 else '?',
-                'System call': lowlevel_utils.decode_syscall(msg.get('syscall'), msg.get('arch', 'c000003e'))
+                'Executable': msg.get('exe', None),
+                'Signal': decode_signal(msg['sig']) if msg['sig'] != 0 else None,
+                'Errno': os.strerror(msg['code']) if msg['code'] != 0 else None,
+                'System call': decode_syscall(msg['syscall'], msg['arch'])
             },
             extra_info={
                 'User ID': msg.get('uid', '?'),
@@ -81,9 +82,9 @@ def seccomp_main_info(msg) -> dict:
 
 
 def default_pretty_printer(msg, suffix='') -> str:
-    return pretty_helper(
+    return format_helper(
         'Unknown message type (type=' + msg['type'] + ')',
-        time_=msg.get('time', 0),
+        timestamp=datetime.fromtimestamp(msg['time']) if 'time' in msg else None,
         urgency='warn',
         suffix=suffix,
         info=dict(((k, v) for k, v in msg.items() if k not in {'time', 'type'})),

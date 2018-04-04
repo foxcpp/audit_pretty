@@ -7,7 +7,7 @@ echo "syscall_table = {}" >> syscall_table.py
 for arch in x86_64 arm arm64
 do
     ausyscall $arch --dump | tail -n +2 | awk -f syscall_table.awk -v ARCH=$arch > syscall_table_$arch.py
-    echo "import audit_pretty.syscall_table_$arch" >> syscall_table.py
-    echo "audit_pretty.syscall_table_$arch.init(syscall_table)" >> syscall_table.py
+    echo "from .syscall_table_$arch import init" >> syscall_table.py
+    echo "init(syscall_table)" >> syscall_table.py
 done
 
