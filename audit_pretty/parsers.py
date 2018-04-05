@@ -16,7 +16,7 @@ from datetime import datetime
 # Note: '?' is special value and discarded by pretty_helper.
 
 def apparmor_pretty(msg, suffix='') -> str:
-    if msg['apparmor'] == 'DENIED':
+    if msg['apparmor'] == 'DENIED' or msg['apparmor'] == 'ALLOWED':
         return format_helper(
                 'AppArmor policy violation',
                 timestamp=datetime.fromtimestamp(msg['time']) if 'time' in msg else None,
