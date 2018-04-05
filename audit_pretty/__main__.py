@@ -3,6 +3,7 @@
 import sys
 import re
 import argparse
+from collections import defaultdict
 
 from audit_pretty import format_utils
 from audit_pretty.parsers import pretty_printers, main_info_filters
@@ -10,7 +11,8 @@ from audit_pretty.frozendict import FrozenDict
 
 
 string_types: dict = {
-    1400: 'AVC'
+    1400: 'AVC',
+    1326: 'SECCOMP'
 }
 
 
@@ -115,7 +117,7 @@ def main():
     if args.count:
         args.merge = True
     if not args.color:
-        format_utils.reset_styling()
+        format_utils.styling = defaultdict(lambda: '')
     format_utils.verbose = args.verbose
 
     try:
