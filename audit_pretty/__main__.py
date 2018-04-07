@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import sys
-import re
 import argparse
 from collections import defaultdict
 
@@ -10,37 +9,7 @@ from audit_pretty import format_utils
 from audit_pretty.parser import pretty_printers, main_info_filters
 from audit_pretty.parsers import *
 from audit_pretty.frozendict import FrozenDict
-
-
-def parse_message(line: str) -> dict:
-    trimmed = line.strip()
-    if len(trimmed) == 0 or 'audit' not in trimmed:
-        return None
-    if trimmed.startswith('['):
-        # Reading from dmesg, strip timestamp and 'audit:' prefix.
-        trimmed = re.sub(r'^\[\d+\.\d+\] audit: ', '', trimmed)
-    match = re.fullmatch(r'type=([0-9_A-Z]+) (?:msg=)?audit\((\d+)\.\d+:(\d+)\): (.+)', trimmed)
-    if match is None:
-        return None
-    trimmed = 'type={} time={} id={} {}'.format(*match.group(1, 2, 3, 4))
-    # audit message is a sequence of values in form key="value" or key='value' or key=value.
-    # Value can contain whitespace so we can't just line.split().split('=').
-    result = {}
-    for match in re.finditer(r'([a-zA-Z\-\_]+)=(?:"(.+?)"|([^ ]+))', trimmed):
-        if match.group(2) is not None:
-            result[match.group(1)] = match.group(2)
-        if match.group(3) is not None:
-            result[match.group(1)] = match.group(3)
-    for k, v in result.items():
-        try:
-            if v.isdigit():
-                result[k] = int(v)
-            if v.startswith('0x'):
-                result[k] = int(v, base=16)
-        except ValueError:
-            pass
-
-    return result
+from audit_pretty.parser_utils import parse_message
 
 
 def setup_argparse() -> argparse.ArgumentParser:
@@ -63,10 +32,11 @@ def setup_argparse() -> argparse.ArgumentParser:
     group = filters.add_mutually_exclusive_group()
     group.add_argument('-e', '--exclude',
                        help='skip messages with this type; can be specified multiple times',
-                       action='append', choices=pretty_printers.keys(), metavar='TYPE', default=[])
+                       action='append', metavar='TYPE', default=[])
     group.add_argument('-i', '--only',
                        help='print only messages with this type; can be specified multiple times',
-                       action='append', choices=pretty_printers.keys(), metavar='TYPE', default=[])
+                       action='append', metavar='TYPE', default=[])
+#                       action='append', choices=pretty_printers.keys(), metavar='TYPE', default=[])
 
     filters.add_argument('--hide-unknown', help='hide messages with unknown type',
                          action='store_true')

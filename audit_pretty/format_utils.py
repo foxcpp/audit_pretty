@@ -26,7 +26,7 @@ def format_helper(title: str, timestamp=None, info={}, extra_info={}, urgency='i
     if not verbose:
         extra_info = {}
     return msg_fmt(
-        timestamp=timestamp if timestamp is not None else '??-??-?? ??:??:??',
+        timestamp=timestamp if timestamp is not None else '????-??-?? ??:??:??',
         title=title,
         suffix=suffix,
         information='\n'.join(map(lambda x: '  ' + field_fmt(*x), filter(lambda x: x[1] is not None, dsum(info, extra_info).items())))
