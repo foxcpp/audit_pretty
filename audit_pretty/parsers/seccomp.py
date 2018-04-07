@@ -1,6 +1,6 @@
 from datetime import datetime
 from audit_pretty.parser import pretty_printer, main_info_filter
-from audit_pretty.lowlevel_utils import decode_signal, decode_syscall
+from audit_pretty.system_utils import decode_signal, decode_syscall
 from audit_pretty.format_utils import format_helper
 
 @pretty_printer('SECCOMP', 1326)

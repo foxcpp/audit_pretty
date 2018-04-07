@@ -1,4 +1,5 @@
 import signal
+import pwd
 from .syscall_table import syscall_table
 
 signals = {}
@@ -26,4 +27,11 @@ def decode_syscall(callnum, scmp_arch='c000003e') -> str:
         return syscall_table[seccomp_arch[scmp_arch]][callnum]
     except KeyError:
         return 'Unknown syscall (' + str(callnum) + ')'
+
+
+def decode_uid(uid, default=None):
+    try:
+        return pwd.getpwuid(uid).pw_name
+    except KeyError:
+        return default
 
