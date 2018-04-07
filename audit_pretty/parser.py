@@ -30,11 +30,15 @@ def default_info_filter(msg) -> dict:
         if key in m:
             del m[key]
 
+
+    del_if_present('id')
+    del_if_present('msg')
+    del_if_present('key')
     del_if_present('time')
     del_if_present('pid')
     del_if_present('fsuid')
     del_if_present('comm')
-    return msg
+    return m
 
 
 pretty_printers: dict = defaultdict(lambda: default_pretty_printer)
