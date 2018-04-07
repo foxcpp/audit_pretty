@@ -19,10 +19,10 @@ def parse_message(line: str) -> dict:
     if trimmed.startswith('['):
         # Reading from dmesg, strip timestamp and 'audit:' prefix.
         trimmed = re.sub(r'^\[\d+\.\d+\] audit: ', '', trimmed)
-    match = re.fullmatch(r'(type=[0-9_A-Z]+) (?:msg=)?audit\((\d+)\.\d+:\d+\): (.+)', trimmed)
+    match = re.fullmatch(r'type=([0-9_A-Z]+) (?:msg=)?audit\((\d+)\.\d+:(\d+)\): (.+)', trimmed)
     if match is None:
         return None
-    trimmed = match.group(1) + ' ' + 'time=' + match.group(2) + ' ' + match.group(3)
+    trimmed = 'type={} time={} id={} {}'.format(*match.group(1, 2, 3, 4))
     # audit message is a sequence of values in form key="value" or key='value' or key=value.
     # Value can contain whitespace so we can't just line.split().split('=').
     result = {}
@@ -47,7 +47,7 @@ def setup_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
             description='Linux Auditing System logs pretty printer',
             epilog='Known message types: ' +
-                ','.join(filter(lambda x: type(x) == str, pretty_printers.keys())),
+                ', '.join(filter(lambda x: type(x) == str, pretty_printers.keys())),
             add_help=False)
 
     dummy = parser.add_argument_group()
@@ -135,8 +135,13 @@ def main():
         if not should_process(args, msg):
             continue
 
+        suffix = '(ID: ' + str(msg['id'])
+        if 'key' in msg:
+            suffix += ', Key: ' + msg['key']
+        suffix += ')'
+
         main_info = main_info_filters[msg['type']](msg)
-        result = pretty_printers[msg['type']](msg)
+        result = pretty_printers[msg['type']](msg, suffix)
         if args.merge or args.count:  # Count only if we need it.
             hashable_info = FrozenDict(main_info)
             if hashable_info not in already_seen.keys():
@@ -147,7 +152,7 @@ def main():
             print(result)
     if args.count:
         for info, count in already_seen.items():
-            result = pretty_printers[info['type']](info, suffix='(' + str(count) + ')')
+            result = pretty_printers[info['type']](info, suffix='(Seen ' + str(count) + ' time(s))')
             print(result)
 
 
