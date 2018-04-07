@@ -12,8 +12,8 @@ def seccomp_pretty(msg, suffix='') -> str:
             suffix=suffix,
             info={
                 'Executable': msg.get('exe', None),
-                'Signal': decode_signal(msg['sig']) if msg['sig'] != 0 else None,
-                'Errno': os.strerror(msg['code']) if msg['code'] != 0 else None,
+                'Signal': decode_signal(msg['sig']) if msg.get('sig', 0) != 0 else None,
+                'Errno': os.strerror(msg['code']) if msg.get('code', 0) != 0 else None,
                 'System call': decode_syscall(msg['syscall'], msg['arch'])
             },
             extra_info={
@@ -28,5 +28,10 @@ def seccomp_pretty(msg, suffix='') -> str:
 
 @main_info_filter('SECCOMP', 1326)
 def seccomp_main_info(msg) -> dict:
-    return {'type': 'SECCOMP', 'exe': msg['exe'], 'syscall': msg['syscall']}
+    return {
+        'type': 'SECCOMP',
+        'exe': msg['exe'],
+        'syscall': msg['syscall'],
+        'arch': msg['arch']  # It's necessary to include arch otherwise system calls can be recognised incorrectly on different architectures.
+    }
 
