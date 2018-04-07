@@ -1,6 +1,7 @@
 from datetime import datetime
 from audit_pretty.parser import default_pretty_printer, pretty_printer, main_info_filter
-from audit_pretty.format_utils import format_helper
+from audit_pretty.format_utils import format_helper, unsafe_char_replacement
+from audit_pretty.field_sanitize import decode_unsafe_hex
 
 
 def policy_violation(msg, suffix) -> str:
@@ -19,7 +20,8 @@ def policy_violation(msg, suffix) -> str:
                 'Requested mask': msg.get('requested_mask'),
                 'Process ID': msg.get('pid'),
                 'FS UID': msg.get('fsuid'),
-                'OUID': msg.get('ouid')
+                'OUID': msg.get('ouid'),
+                'Thread name': decode_unsafe_hex(msg.get('comm'), unsafe_char_replacement)
             })
 
 
