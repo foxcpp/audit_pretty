@@ -4,6 +4,8 @@ from collections import defaultdict
 type_quotes = defaultdict(lambda: "'", {
     'AVC': '"',
     '1400': '"',
+    'SYSCALL': '"\'',
+    '1300': '"\''
 })
 
 
@@ -20,7 +22,7 @@ def split_message(msg, quotes="'") -> dict:
             result[match.group(1)] = match.group(3)
     for k, v in result.items():
         try:
-            if v.isdigit():
+            if v.isdigit() or v[0] == '-' and v[1:].isdigit():
                 result[k] = int(v)
             if v.startswith('0x'):
                 result[k] = int(v, base=16)
