@@ -35,8 +35,7 @@ def setup_argparse() -> argparse.ArgumentParser:
                        action='append', metavar='TYPE', default=[])
     group.add_argument('-i', '--only',
                        help='print only messages with this type; can be specified multiple times',
-                       action='append', metavar='TYPE', default=[])
-#                       action='append', choices=pretty_printers.keys(), metavar='TYPE', default=[])
+                       action='append', choices=pretty_printers.keys(), metavar='TYPE', default=[])
 
     filters.add_argument('--hide-unknown', help='hide messages with unknown type',
                          action='store_true')
@@ -106,7 +105,7 @@ def main():
             continue
 
         suffix = '(ID: ' + str(msg['id'])
-        if 'key' in msg:
+        if 'key' in msg and msg['key'] != '(null)':
             suffix += ', Key: ' + msg['key']
         suffix += ')'
 
