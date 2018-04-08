@@ -28,22 +28,22 @@ def generic_user_event(title, msg, suffix):
         })
 
 
-@pretty_printer('USER_START')
+@pretty_printer('USER_START', 1105)
 def user_start(msg, suffix='') -> str:
     return generic_user_event('User session started', msg, suffix)
 
 
-@pretty_printer('USER_LOGIN')
+@pretty_printer('USER_LOGIN', 1112)
 def user_login(msg, suffix='') -> str:
     return generic_user_event('User logged in', msg, suffix)
 
 
-@pretty_printer('USER_END')
+@pretty_printer('USER_END', 1106)
 def user_end(msg, suffix='') -> str:
     return generic_user_event('User session ended', msg, suffix)
 
 
-@pretty_printer('USER_CMD')
+@pretty_printer('USER_CMD', 1123)
 def user_cmd(msg, suffix) -> str:
     pam_msg = split_message(msg['msg'], quotes='"')
     return format_helper(
@@ -66,17 +66,18 @@ def user_cmd(msg, suffix) -> str:
         })
 
 
-@pretty_printer('USER_ACCT')
+@pretty_printer('USER_ACCT', 1101)
 def user_acct(msg, suffix='') -> str:
     return generic_user_event('User authorization', msg, suffix)
 
 
-@pretty_printer('USER_AUTH')
+@pretty_printer('USER_AUTH', 1100)
 def user_auth(msg, suffix='') -> str:
     return generic_user_event('User authentication', msg, suffix)
 
 
-@main_info_filter('USER_START', 'USER_LOGIN', 'USER_END', 'USER_CMD', 'USER_ACCT', 'USER_AUTH')
+@main_info_filter('USER_START', 1105, 'USER_LOGIN', 1112, 'USER_END', 1106,
+                  'USER_CMD', 1123, 'USER_ACCT', 1101, 'USER_AUTH', 1100)
 def user_main_info(msg):
     m = msg.copy()
     pam = split_message(m['msg'], quotes='"')
