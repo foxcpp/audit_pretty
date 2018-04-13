@@ -10,7 +10,7 @@ Installation
 ------------------------
 
 You can run script directly from repository: `python3 -m audit_pretty ARGS...`
-or install it to system directory: `pip3 install audit_pretty`
+~~or install it to system directory: `pip3 install audit_pretty`~~ _wheel is broken_
 
 Usage
 ------------------------
