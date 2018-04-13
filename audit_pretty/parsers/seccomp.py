@@ -1,5 +1,5 @@
 from datetime import datetime
-from audit_pretty.parser import pretty_printer, main_info_filter
+from audit_pretty.parser import pretty_printer, main_info_filter, subdict
 from audit_pretty.system_utils import decode_signal, decode_syscall
 from audit_pretty.format_utils import format_helper
 
@@ -28,10 +28,5 @@ def seccomp_pretty(msg, suffix='') -> str:
 
 @main_info_filter('SECCOMP', 1326)
 def seccomp_main_info(msg) -> dict:
-    return {
-        'type': 'SECCOMP',
-        'exe': msg['exe'],
-        'syscall': msg['syscall'],
-        'arch': msg['arch']  # It's necessary to include arch otherwise system calls can be recognised incorrectly on different architectures.
-    }
+    return subdict(msg, ('type', 'exe', 'syscall', 'arch'))
 

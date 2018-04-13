@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from audit_pretty import __version__
 
 setup(
@@ -10,11 +10,11 @@ setup(
     license="MIT",
     keywords="utilty linux auditd",
     url="https://github.com/foxcpp/audit_pretty",
-    packages=["audit_pretty"],
+    packages=find_packages(),
     long_description_content_type='text/markdown',
     entry_points={
         'console_scripts': [
-            'audit-pretty = audit_pretty:main'
+            'audit-pretty = audit_pretty.__main__:main'
         ]
     },
     classifiers=[

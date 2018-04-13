@@ -1,6 +1,6 @@
 from datetime import datetime
-from audit_pretty.parser import default_pretty_printer, pretty_printer, main_info_filter
-from audit_pretty.format_utils import format_helper, unsafe_char_replacement
+from audit_pretty.parser import default_pretty_printer, pretty_printer, main_info_filter, subdict
+from audit_pretty.format_utils import format_helper
 from audit_pretty.field_sanitize import decode_unsafe_hex
 
 
@@ -13,7 +13,7 @@ def policy_violation(msg, suffix) -> str:
             info={
                 'Operation': msg.get('operation'),
                 'Profile': msg.get('profile'),
-                'Target': msg.get('name', msg.get('peer')),
+                'Target': decode_unsafe_hex(msg.get('name', msg.get('peer'))) if 'name' in msg or 'peer' in msg else None,
                 'Denied mask': msg.get('denied_mask')
             },
             extra_info={
@@ -21,7 +21,7 @@ def policy_violation(msg, suffix) -> str:
                 'Process ID': msg.get('pid'),
                 'FS UID': msg.get('fsuid'),
                 'OUID': msg.get('ouid'),
-                'Thread name': decode_unsafe_hex(msg.get('comm'), unsafe_char_replacement)
+                'Thread name': decode_unsafe_hex(msg['comm']) if 'comm' in msg else None
             })
 
 
@@ -62,17 +62,8 @@ def apparmor_pretty(msg, suffix='') -> str:
 
 @main_info_filter('AVC', 1400)
 def apparmor_main_info(msg) -> dict:
-    m = msg.copy()
-
-    def del_if_present(key):
-        if key in m:
-            del m[key]
-    del_if_present('time')
-    del_if_present('pid')
-    del_if_present('comm')
-    if m['apparmor'] == 'DENIED' or m['apparmor'] == 'ALLOWED':
-        # Don't present if event is not related to file system (ptrace comes to mind).
-        del_if_present('fsuid')
-        del_if_present('ouid')
-    return m
+    if msg['apparmor'] == 'DENIED' or msg['apparmor'] == 'ALLOWED':
+        return subdict(msg, ('type', 'apparmor', 'operation', 'profile', 'denied_mask', 'name', 'peer'))
+    if msg['apparmor'] == 'STATUS':
+        return subdict(msg, ('type', 'apparmor', 'operation', 'type', 'name'))
 

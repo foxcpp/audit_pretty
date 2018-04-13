@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import traceback
 from collections import defaultdict
 
 import audit_pretty
@@ -77,6 +78,14 @@ def should_process(args, msg) -> bool:
     return True
 
 
+def formatter_error(exception, message):
+    print(format_utils.styling['red'], format_utils.styling['bold'], end='')
+    print('ERROR: Formatter failed:', type(exception).__qualname__ + ':', exception.args[0])
+    print(format_utils.styling['reset'])
+    print('Message:', message)
+    print(traceback.format_exc())
+
+
 def main():
     parser = setup_argparse()
     args = parser.parse_args()
@@ -85,7 +94,7 @@ def main():
         return
     if args.version:
         print('audit_pretty', audit_pretty.__version__)
-        print('Copyright (c) 2018 foxcpp. Published under terms of the MIT license.')
+        print('Copyright (c) 2018 Max Mazurov (fox.cpp). Published under terms of the MIT license.')
         print()
         print('- Bugtracker: https://github.com/foxcpp/audit_pretty/issues')
         print('- Source code: https://github.com/foxcpp/audit_pretty/')
@@ -110,7 +119,11 @@ def main():
         suffix += ')'
 
         main_info = main_info_filters[msg['type']](msg)
-        result = pretty_printers[msg['type']](msg, suffix)
+        try:
+            result = pretty_printers[msg['type']](msg, suffix)
+        except KeyError as ex:
+            formatter_error(ex, msg)
+            continue
         if args.merge or args.count:  # Count only if we need it.
             hashable_info = FrozenDict(main_info)
             if hashable_info not in already_seen.keys():

@@ -41,8 +41,8 @@ def default_info_filter(msg) -> dict:
     return m
 
 
-pretty_printers: dict = defaultdict(lambda: default_pretty_printer)
-main_info_filters: dict = defaultdict(lambda: default_info_filter)
+pretty_printers = defaultdict(lambda: default_pretty_printer)
+main_info_filters = defaultdict(lambda: default_info_filter)
 
 
 def main_info_filter(*ids):
@@ -57,4 +57,8 @@ def pretty_printer(*ids):
         for id in ids:
             pretty_printers[id] = func
     return decorator
+
+
+def subdict(orig: dict, keys: list):
+    return {k: orig[k] for k in keys if k in orig}
 

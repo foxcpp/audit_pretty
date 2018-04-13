@@ -30,7 +30,7 @@ def unsafe_char_replacement(ch: int) -> str:
         return styling['red'] + r'\n' + styling['reset']
     if ch == ord('\t'):
         return styling['red'] + r'\t' + styling['reset']
-    return styling['red'] + '%' + hex(ch) + styling['reset']
+    return styling['red'] + '%' + hex(ch).upper() + styling['reset']
 
 
 def format_helper(title: str, timestamp=None, info={}, extra_info={}, urgency='info', suffix='') -> str:

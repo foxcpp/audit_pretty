@@ -1,4 +1,7 @@
 import string
+import binascii
+
+from audit_pretty.format_utils import unsafe_char_replacement
 
 
 def is_hex(field):
@@ -11,19 +14,18 @@ def is_hex(field):
     return True
 
 
-def decode_unsafe_hex(field, unsafe_formatter=lambda x: '') -> str:
+def decode_unsafe_hex(field, unsafe_formatter=unsafe_char_replacement) -> str:
     if not is_hex(field):
         return field
     try:
-        # https://stackoverflow.com/a/9475354
-        raw_chars = list(map(lambda x: int(x, base=16), [field[i:i+2] for i in range(0, len(field), 2)]))
-        chars = []
+        raw_chars = binascii.unhexlify(field)
+        chars = bytearray()
         for char in raw_chars:
             if char < 32 or char > 126:
-                chars += list(unsafe_formatter(char).encode('ascii'))
+                chars += unsafe_formatter(char).encode('ascii')
             else:
                 chars.append(char)
-        return ''.join(map(chr, chars))
-    except (ValueError, UnicodeDecodeError):
+        return chars.decode()
+    except (ValueError, UnicodeDecodeError, binascii.Error):
         return field
 
