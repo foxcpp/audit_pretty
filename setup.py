@@ -11,10 +11,9 @@ setup(
     keywords="utilty linux auditd",
     url="https://github.com/foxcpp/audit_pretty",
     packages=find_packages(),
-    long_description_content_type='text/markdown',
     entry_points={
         'console_scripts': [
-            'audit-pretty = audit_pretty.__main__:main'
+            'audit-pretty = audit_pretty.__main__:entry'
         ]
     },
     classifiers=[

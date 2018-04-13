@@ -138,9 +138,12 @@ def main():
             print(result)
 
 
-if __name__ == '__main__':
+def entry():
     try:
         main()
     except KeyboardInterrupt:
         pass
+
+if __name__ == '__main__':
+    entry()
 
