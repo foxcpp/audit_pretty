@@ -1,7 +1,7 @@
 from datetime import datetime
 from audit_pretty.parser import default_pretty_printer, pretty_printer, main_info_filter
 from audit_pretty.parser_utils import split_message
-from audit_pretty.format_utils import format_helper, unsafe_char_replacement
+from audit_pretty.format_utils import format_helper
 from audit_pretty.field_sanitize import decode_unsafe_hex
 from audit_pretty.system_utils import decode_uid
 
@@ -14,14 +14,14 @@ def generic_user_event(title, msg, suffix):
         urgency='info',
         suffix=suffix,
         info={
-            'Account': pam_msg['acct'],
+            'Account': pam_msg.get('acct'),
             'Command': pam_msg.get('exe', pam_msg.get('cmd')),
             'Session': msg.get('ses'),
             'Success': 'Yes' if pam_msg.get('res') == 'success' else 'No'
         },
         extra_info={
             'Process ID': msg.get('pid'),
-            'Audit UID': decode_uid(msg.get('auid')),
+            'Audit UID': decode_uid(msg.get('auid')) if 'auid' in msg else None,
             'Hostname': pam_msg.get('hostname') if pam_msg.get('hostname') != '?' else None,
             'Address': pam_msg.get('addr') if pam_msg.get('addr') != '?' else None,
             'Terminal': pam_msg.get('terminal') if pam_msg.get('terminal') != '?' else None
@@ -54,7 +54,7 @@ def user_cmd(msg, suffix) -> str:
         info={
             'Executor\'s UID': decode_uid(msg['auid'], default='UNKNOWN-USER') + ' (' + str(msg['auid']) + ')',
             'Working directory': pam_msg['cwd'],
-            'Command': decode_unsafe_hex(str(pam_msg['cmd']), unsafe_char_replacement),
+            'Command': decode_unsafe_hex(str(pam_msg['cmd'])),
             'Session': msg.get('ses'),
             'Success': 'Yes' if pam_msg.get('res') == 'success' else 'No'
         },
