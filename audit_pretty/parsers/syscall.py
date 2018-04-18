@@ -2,7 +2,6 @@ from datetime import datetime
 from os import strerror
 from audit_pretty.parser import pretty_printer, main_info_filter
 from audit_pretty.format_utils import format_helper
-from audit_pretty.format_utils import unsafe_char_replacement as unsafe_format
 from audit_pretty.field_sanitize import decode_unsafe_hex
 import audit_pretty.system_utils as system_utils
 
@@ -17,7 +16,7 @@ def systemcall_pretty(msg, suffix=''):
         info={
             'System call': system_utils.decode_syscall(msg['syscall']),
             'Result': ('ERROR: ' + strerror(-msg['exit'])) if msg['exit'] < 0 else msg['exit'],
-            'Executable': decode_unsafe_hex(msg['exe'], unsafe_format),
+            'Executable': decode_unsafe_hex(msg['exe']),
             'Real UID/GID': '{} ({}) / {} ({})'.format(
                 system_utils.decode_uid(msg['uid'], 'UNKNOWN'), msg['uid'],
                 system_utils.decode_gid(msg['gid'], 'UNKNOWN'), msg['gid']),
@@ -41,8 +40,8 @@ def systemcall_pretty(msg, suffix=''):
             'Parent process ID': msg.get('ppid'),
             'Session ID': msg.get('ses'),
             'Terminal': msg.get('tty') if msg.get('tty') != '(none)' else None,
-            'Thread name': decode_unsafe_hex(msg['comm'], unsafe_format) if 'comm' in msg else None,
-            'Arch.': system_utils.decode_arch(msg['arch'], unsafe_format) if 'arch' in msg else None
+            'Thread name': decode_unsafe_hex(msg['comm']) if 'comm' in msg else None,
+            'Arch.': system_utils.decode_arch(msg['arch']) if 'arch' in msg else None
         })
 
 

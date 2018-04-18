@@ -9,6 +9,7 @@ import audit_pretty.system_utils as system_utils
 def proctitle(msg, suffix=''):
     return format_helper(
         title='Process title',
+        suffix=suffix,
         timestamp=datetime.fromtimestamp(msg['time']) if 'time' in msg else None,
         urgency='info',
         info={'Title': decode_unsafe_hex(msg['proctitle'])})
@@ -18,6 +19,7 @@ def proctitle(msg, suffix=''):
 def path(msg, suffix=''):
     return format_helper(
         title='Filesystem path',
+        suffix=suffix,
         timestamp=datetime.fromtimestamp(msg['time']) if 'time' in msg else None,
         urgency='info',
         info={
@@ -35,6 +37,7 @@ def path(msg, suffix=''):
 def cwd(msg, suffix=''):
     return format_helper(
         title='Current working directory',
+        suffix=suffix,
         timestamp=datetime.fromtimestamp(msg['time']) if 'time' in msg else None,
         urgency='info',
         info={
