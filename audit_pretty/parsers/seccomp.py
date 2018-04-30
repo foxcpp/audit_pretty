@@ -13,7 +13,6 @@ def seccomp_pretty(msg, suffix='') -> str:
             info={
                 'Executable': msg.get('exe', None),
                 'Signal': decode_signal(msg['sig']) if msg.get('sig', 0) != 0 else None,
-                'Errno': os.strerror(msg['code']) if msg.get('code', 0) != 0 else None,
                 'System call': decode_syscall(msg['syscall'], msg['arch'])
             },
             extra_info={
