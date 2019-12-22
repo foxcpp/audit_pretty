@@ -25,14 +25,17 @@ def policy_violation(msg, suffix) -> str:
             })
 
 
-def status(msg, suffix) -> str:
-    title = 'Unknown AppArmor operation (' + msg['operation'] + ')'
-    if msg['operation'] == 'profile_load':
-        title = 'AppArmor profile load'
-    if msg['operation'] == 'profile_replace':
-        title = 'AppArmor profile replace'
-    if msg['operation'] == 'profile_unload':
-        title = 'AppArmor profile unload'
+def status(msg: dict, suffix: str) -> str:
+    if 'operation' in msg:
+        title = 'Unknown AppArmor operation (' + msg['operation'] + ')'
+        if msg['operation'] == 'profile_load':
+            title = 'AppArmor profile load'
+        elif msg['operation'] == 'profile_replace':
+            title = 'AppArmor profile replace'
+        elif msg['operation'] == 'profile_unload':
+            title = 'AppArmor profile unload'
+    elif 'info' in msg:
+        title = msg['info']
 
     return format_helper(
             title=title,
@@ -40,7 +43,7 @@ def status(msg, suffix) -> str:
             urgency='info',
             suffix=suffix,
             info={
-                'Profile name': msg['name'],
+                'Profile name': msg.get('name'),
             },
             extra_info={
                 'Process ID': msg.get('pid'),
